@@ -7,3 +7,4 @@ sentence-transformers>=3.0   # optional but recommended: better semantic search 
 torch>=2.2
 sentencepiece>=0.2
 tzdata>=2024.1
+gunicorn
