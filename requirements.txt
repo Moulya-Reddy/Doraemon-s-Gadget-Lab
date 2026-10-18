@@ -1,0 +1,9 @@
+flask>=3.0
+requests>=2.31
+numpy>=1.26
+scikit-learn>=1.4        # TF-IDF fallback embedder (tiny, always works)
+sentence-transformers>=3.0   # optional but recommended: better semantic search (free, runs on CPU)
+# --- only needed for the TinyGPT part ---
+torch>=2.2
+sentencepiece>=0.2
+tzdata>=2024.1
