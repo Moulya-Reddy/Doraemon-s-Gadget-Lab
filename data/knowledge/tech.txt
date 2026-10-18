@@ -1,0 +1,17 @@
+A neural network is made of layers of simple units, each with adjustable weights. It learns by comparing its predictions with correct answers to compute a loss, then using gradient descent to adjust the weights a little so the loss becomes smaller. This is repeated over many training steps.
+
+The Transformer architecture was introduced in 2017 in the paper Attention Is All You Need. Its key idea is self-attention, which lets every token in a sequence look at and weigh every other token. GPT-style language models are decoder-only transformers that learn to predict the next token.
+
+Retrieval-Augmented Generation, or RAG, improves a language model by first searching a knowledge base for passages related to the question, then giving those passages to the model as context. This keeps answers grounded in trusted documents and reduces made-up answers.
+
+Python is a high-level programming language known for readable code. It was created by Guido van Rossum and first released in 1991. It is widely used for web development, data science and machine learning.
+
+To create a Python virtual environment, open a terminal in your project folder and run python3 -m venv .venv. Activate it with source .venv/bin/activate on macOS or Linux. Then install packages with pip install, and run deactivate when you are done.
+
+DNS, the Domain Name System, works like the internet's phone book. It translates a human-friendly name such as example.com into the numeric IP address of the server so your browser knows where to send its HTTP request.
+
+Git is a version control system that records snapshots of your project. To start, run git init, then git add to stage files and git commit to save a snapshot. Branches let you try changes without affecting the main line of work.
+
+Tokenization splits text into small pieces called tokens before a model reads it. Byte Pair Encoding starts with characters and repeatedly merges the most frequent neighbouring pairs, giving a vocabulary of subword pieces that handles rare words well.
+
+Embeddings turn text into lists of numbers called vectors so that meaning can be compared. Texts with similar meaning end up with vectors that point in similar directions, and cosine similarity measures how close two vectors are. Embeddings are what make semantic search possible in RAG.
