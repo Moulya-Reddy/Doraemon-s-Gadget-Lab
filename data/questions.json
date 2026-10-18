@@ -1,0 +1,8 @@
+{
+  "science": ["How does photosynthesis work?", "What is gravity?", "Explain the water cycle", "What are atoms made of?", "How does electricity work?", "How do vaccines work?", "Who was Charles Darwin and what did he discover?"],
+  "space": ["Why is Mars red?", "What is a black hole?", "How far is the Moon?", "What is a light-year?", "When did Chandrayaan-3 land on the Moon?", "How many planets are in the Solar System?", "What is the Milky Way?"],
+  "history": ["When did India become independent?", "Who invented the printing press?", "When did the Industrial Revolution begin?", "Who built the Taj Mahal?", "When did World War II end?", "What was the Indus Valley Civilization?", "Who created the World Wide Web?"],
+  "geography": ["Where is Mount Everest?", "How long is the Nile?", "Where is Hyderabad?", "What is the largest desert in the world?", "How deep is the Mariana Trench?", "How many continents are there?", "Where is Mount Fuji?"],
+  "tech": ["What is RAG?", "How does a transformer work?", "How to create a Python virtual environment?", "What is DNS?", "What are embeddings?", "How to start using Git?", "What is tokenization?"],
+  "food_health": ["How to make masala chai?", "How to cook basmati rice?", "What is dum biryani?", "How much sleep do adults need?", "How much water should I drink?", "Why is protein important?", "How to wash hands properly?"]
+}
