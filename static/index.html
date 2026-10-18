@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doraemon's Pocket</title>
+<link rel="icon" href="data:,">
+<style>
+@font-face{font-family:"Bangers";src:url("/static/fonts/Bangers-Regular.ttf");font-display:swap}
+@font-face{font-family:"Comic Neue";src:url("/static/fonts/ComicNeue-Regular.ttf");font-weight:400;font-display:swap}
+@font-face{font-family:"Comic Neue";src:url("/static/fonts/ComicNeue-Bold.ttf");font-weight:700;font-display:swap}
+:root{
+  --sky-top:#69C3FF; --sky-bottom:#BFE8FF;
+  --cobalt:#1F5FD6; --ink:#14284B; --cream:#FFF7E6;
+  --orange:#FF8A3D; --sun:#FFD23F; --deep:#0E2A66; --card:#FFFDF6;
+  /* where gadgets leave the pouch (tune these if you swap in your own Pip image) */
+  --pouch-x:50%; --pouch-y:76%; --gx:102%; --gy:36%;
+  --display:"Bangers","Comic Neue","Comic Sans MS",cursive;
+  --body:"Comic Neue","Comic Sans MS",ui-rounded,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--body);color:var(--ink);background:linear-gradient(180deg,var(--sky-top),var(--sky-bottom)) fixed;overflow-x:hidden}
+
+/* clouds */
+.cloud{position:fixed;background:#fff;border-radius:999px;opacity:.9;z-index:0;pointer-events:none}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:52%;height:150%;left:14%;top:-70%}
+.cloud::after{width:38%;height:120%;right:12%;top:-45%}
+.c1{width:190px;height:50px;top:7%;left:6%}
+.c2{width:240px;height:60px;top:22%;right:5%;opacity:.75}
+.c3{width:150px;height:40px;bottom:12%;left:34%;opacity:.7}
+@media (prefers-reduced-motion:no-preference){
+  .c1{animation:drift 60s linear infinite alternate}
+  .c2{animation:drift 80s linear infinite alternate-reverse}
+}
+@keyframes drift{from{transform:translateX(-30px)}to{transform:translateX(60px)}}
+
+/* layout */
+main{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:20px 20px 48px;
+  display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:28px;align-items:start}
+header{grid-column:1/-1}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,3rem);margin:0;line-height:1}
+header p{margin:.35rem 0 0;font-weight:700;max-width:56ch}
+@media (max-width:820px){main{grid-template-columns:1fr}}
+
+/* stage */
+.bubble{position:relative;background:var(--card);border:4px solid var(--ink);border-radius:22px;
+  padding:12px 16px;font-weight:800;min-height:3.2em;margin:0 8px 18px}
+.bubble::after{content:"";position:absolute;left:46%;bottom:-18px;width:20px;height:20px;background:var(--card);
+  border-right:4px solid var(--ink);border-bottom:4px solid var(--ink);transform:rotate(45deg) translate(-6px,-6px)}
+.pip-wrap{position:relative;width:min(100%,430px);margin:0 auto}
+/* gadget leaving the pouch */
+#gadget{position:absolute;width:120px;aspect-ratio:1;z-index:5;left:var(--pouch-x);top:var(--pouch-y);translate:-50% -50%;
+  opacity:0;pointer-events:none;filter:drop-shadow(0 6px 0 rgba(20,40,75,.25))}
+#gadget svg,#gadget img{width:100%;height:100%;overflow:visible;object-fit:contain}
+#gadget.pop{animation:pop 1s cubic-bezier(.2,1.3,.4,1) forwards}
+@keyframes pop{
+  0%{opacity:0;left:var(--pouch-x);top:var(--pouch-y);scale:.2}
+  15%{opacity:1}
+  100%{opacity:1;left:var(--gx);top:var(--gy);scale:1}
+}
+@media (prefers-reduced-motion:reduce){#gadget.pop{animation:none;opacity:1;left:var(--gx);top:var(--gy)}}
+
+/* ask form */
+form{display:flex;gap:8px;margin-top:14px}
+label.sr{position:absolute;left:-9999px}
+input[type=text]{flex:1;min-width:0;font:700 1.05rem var(--body);color:var(--ink);
+  background:var(--card);border:4px solid var(--ink);border-radius:16px;padding:12px 14px}
+button.ask{font:800 1.1rem var(--display);color:var(--ink);background:var(--sun);border:4px solid var(--ink);
+  border-radius:16px;padding:8px 18px;cursor:pointer;box-shadow:0 5px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+button.ask:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+button.ask:disabled{opacity:.6;cursor:progress}
+:focus-visible{outline:4px solid var(--orange);outline-offset:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips button{font:700 .88rem var(--body);color:var(--ink);background:rgba(255,255,255,.75);
+  border:3px solid var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chips button:hover{background:#fff}
+
+/* gadget drawer */
+.drawer{margin-top:18px;background:rgba(255,255,255,.6);border:3px solid var(--ink);border-radius:18px;padding:10px 14px}
+.drawer summary{font:800 1.05rem var(--display);cursor:pointer}
+.drawer ul{list-style:none;margin:10px 0 2px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drawer button{width:100%;display:flex;gap:8px;align-items:center;text-align:left;background:var(--card);
+  border:3px solid transparent;border-radius:12px;padding:6px 8px;cursor:pointer;font:700 .82rem var(--body);color:var(--ink)}
+.drawer button:hover{border-color:var(--ink)}
+.drawer li.active button{border-color:var(--ink);background:var(--sun)}
+.drawer svg,.drawer img{width:34px;height:34px;flex:none;object-fit:contain}
+.drawer b{display:block;font-family:var(--display);font-size:.95rem;line-height:1.05}
+@media (max-width:420px){.drawer ul{grid-template-columns:1fr}}
+
+/* answer zone */
+.answer-zone{display:flex;flex-direction:column;gap:22px}
+.placeholder{border:4px dashed rgba(20,40,75,.55);border-radius:28px;padding:28px;font-weight:800;
+  background:rgba(255,255,255,.35);max-width:52ch}
+.placeholder b{font-family:var(--display);font-size:1.5rem;display:block;margin-bottom:6px}
+.card{background:var(--card);border:4px solid var(--ink);border-radius:28px;box-shadow:0 8px 0 var(--ink);
+  overflow:hidden;clip-path:circle(0% at 0% 20%);visibility:hidden;display:none}
+.card.show{display:block}
+.card.open{visibility:visible;clip-path:circle(150% at 0% 20%);transition:clip-path .9s cubic-bezier(.3,.8,.3,1)}
+@media (prefers-reduced-motion:reduce){.card.open{transition:none}}
+.card-head{display:flex;gap:14px;align-items:center;padding:14px 20px;border-bottom:4px solid var(--ink);background:var(--gcolor,var(--sun))}
+.card-head svg,.card-head img{width:56px;height:56px;flex:none;object-fit:contain}
+.card-head h2{margin:0;font-family:var(--display);font-size:1.6rem;line-height:1}
+.card-head p{margin:2px 0 0;font-weight:800;font-size:.95rem}
+.card-body{padding:18px 22px 22px}
+.why{font-size:.92rem;font-weight:700;margin:0 0 14px;padding:8px 12px;border-radius:12px;background:#EAF4FF;max-width:70ch}
+.answer{font-size:1.1rem;line-height:1.6;max-width:68ch}
+.answer p{margin:0 0 .7em}
+.answer ul,.answer ol{margin:.2em 0 .8em;padding-left:1.4em}
+.answer li{margin:.35em 0}
+.warn{margin-top:10px;padding:8px 12px;border-radius:12px;background:#FFE9C7;font-weight:800;font-size:.92rem;max-width:70ch}
+details.src-box{margin-top:18px;border-top:3px solid rgba(20,40,75,.2);padding-top:12px}
+details.src-box summary{font-weight:800;cursor:pointer}
+.src{margin:10px 0;padding:10px 12px;border-radius:12px;background:#F1F5FB;font-size:.9rem;line-height:1.5}
+.src b{font-family:var(--display);font-size:1rem}
+.src a{color:var(--cobalt);font-weight:800}
+.meta{margin-top:12px;font-size:.82rem;font-weight:700;opacity:.75}
+
+/* "More from Doraemon" panel: follow-ups, short version, quiz, fun fact */
+.more{background:var(--card);border:4px solid var(--ink);border-radius:22px;padding:12px 16px 14px}
+.more h3{margin:0 0 4px;font:400 1.3rem var(--display);letter-spacing:.04em;color:var(--cobalt)}
+.more .body p{margin:.1em 0 .5em;font-weight:700;line-height:1.45}
+.more .sec+.sec{margin-top:10px;padding-top:10px;border-top:3px dashed rgba(20,40,75,.25)}
+.more .sec:empty{display:none}
+/* (old friend-chat styles below are unused) */
+.cast{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:12px;align-items:flex-start}
+@media (prefers-reduced-motion:no-preference){.row{animation:rise .45s both}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.avatar{width:84px;height:84px;flex:none;border:4px solid var(--ink);border-radius:50%;background:var(--bg,#fff);overflow:hidden}
+.avatar svg,.avatar img{width:100%;height:100%;display:block;object-fit:cover}
+.say{position:relative;flex:1;min-width:0;background:var(--card);border:4px solid var(--ink);border-radius:20px;padding:8px 14px 12px}
+.say::before{content:"";position:absolute;left:-12px;top:26px;width:18px;height:18px;background:var(--card);
+  border-left:4px solid var(--ink);border-bottom:4px solid var(--ink);transform:rotate(45deg)}
+.say .name{font:800 .95rem var(--display);color:var(--cobalt)}
+.say .body p{margin:.1em 0 .4em;font-weight:700;line-height:1.45}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.opt{font:800 .9rem var(--body);color:var(--ink);background:var(--sun);border:3px solid var(--ink);border-radius:999px;
+  padding:5px 13px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.opt:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.opt.soft{background:#fff}
+.opt.right{background:#8EE6B0}.opt.wrong{background:#FFA7A7}
+.opt:disabled{cursor:default}
+.qtext{font-weight:800;margin-bottom:6px}
+
+/* manga lettering */
+body{font-weight:700;font-size:17px}
+h1,.card-head h2,.say .name,.drawer b,.placeholder b,button.ask,.drawer summary{font-family:var(--display);font-weight:400;letter-spacing:.04em}
+h1{font-size:clamp(2.6rem,6vw,4rem);text-shadow:3px 3px 0 var(--sun)}
+.card-head h2{font-size:2rem}
+.say .name{font-size:1.3rem}
+.drawer summary{font-size:1.3rem}
+.drawer b{font-size:1.1rem}
+.placeholder b{font-size:1.8rem}
+button.ask{font-size:1.5rem}
+.bubble,.say .body p,.qtext{text-transform:uppercase;letter-spacing:.02em}
+.answer{font-weight:400;font-size:1.15rem}
+.answer b{font-weight:700}
+.opt,.chips button,input[type=text]{font-family:var(--body);font-weight:700}
+.opt{font-size:1rem}
+
+.avatar .face-crop{display:block;width:100%;height:100%}
+
+/* character picker + stage */
+#stageExtra{margin-top:8px}
+#stageExtra:empty{display:none}
+#stageExtra p{font-size:.95rem;margin:.1em 0 .4em}
+
+[hidden]{display:none !important}
+/* ---- characters are drawn in code (static/characters.js). The body never moves;
+        only one arm and the eyes animate. ---- */
+#stageFig svg{display:block;width:100%;height:auto;overflow:visible;cursor:pointer}
+#pouchFx{position:absolute;left:var(--pouch-x);top:var(--pouch-y);width:42%;aspect-ratio:2/1;translate:-50% -50%;
+  border-radius:50%;background:radial-gradient(closest-side,rgba(255,210,63,.32),rgba(255,210,63,0));
+  opacity:0;pointer-events:none;z-index:3}
+.rummage #pouchFx{opacity:1}
+@media (prefers-reduced-motion:no-preference){
+  .rummage #pouchFx{animation:glowpulse .5s ease-in-out infinite alternate}
+}
+.sound-toggle{position:fixed;top:14px;right:16px;z-index:30;font:800 .9rem var(--body);color:var(--ink);background:rgba(255,255,255,.78);border:3px solid var(--ink);
+  border-radius:14px;padding:8px 10px;cursor:pointer;white-space:nowrap}
+.sound-toggle[aria-pressed="false"]{opacity:.72;background:#e7edf5}
+@keyframes glowpulse{from{scale:.8;opacity:.6}to{scale:1.15;opacity:1}}
+
+</style>
+</head>
+<body>
+<div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+
+<!-- ============ SVG sprite sheet: gadget icons (g-) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="g-portal_door" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round">
+      <rect x="24" y="6" width="52" height="88" rx="5" fill="#FF6FA8"/>
+      <rect x="33" y="15" width="34" height="70" rx="3" fill="#fff"/>
+      <circle cx="61" cy="52" r="4" fill="#FFD23F" stroke-width="2.5"/>
+    </symbol>
+    <symbol id="g-rewind_cloth" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M12 28 Q50 10 90 26 Q80 54 92 78 Q52 92 10 76 Q22 52 12 28Z" fill="#8E5BC7"/>
+      <g fill="#FFF7E6" stroke-width="3"><circle cx="32" cy="40" r="10"/><circle cx="66" cy="38" r="10"/><circle cx="72" cy="64" r="10"/><circle cx="34" cy="64" r="10"/></g>
+      <g stroke-width="3"><path d="M32 40v-6M32 40l5 3M66 38v-6M66 38l-5 3M72 64v-6M72 64l5 2M34 64v-6M34 64l-5 3"/></g>
+    </symbol>
+    <symbol id="g-recall_toast" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M18 46 Q8 20 34 18 Q50 8 66 18 Q92 20 82 46 L82 84 Q82 90 76 90 L24 90 Q18 90 18 84Z" fill="#F2C17D"/>
+      <path d="M32 40h36M32 54h36M32 68h22" stroke-width="3.5"/>
+    </symbol>
+    <symbol id="g-shrink_light" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M32 12H68L74 32H26Z" fill="#C7D2E8"/>
+      <ellipse cx="50" cy="12" rx="18" ry="6" fill="#FFD23F"/>
+      <rect x="32" y="32" width="36" height="60" rx="7" fill="#6C5CE7"/>
+      <rect x="44" y="46" width="12" height="16" rx="6" fill="#FFD23F" stroke-width="3"/>
+    </symbol>
+    <symbol id="g-propeller_cap" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="46" y="48" width="8" height="46" rx="4" fill="#E8A33D"/>
+      <ellipse cx="26" cy="38" rx="24" ry="8" fill="#FFD23F" transform="rotate(-10 26 38)"/>
+      <ellipse cx="74" cy="38" rx="24" ry="8" fill="#FFD23F" transform="rotate(10 74 38)"/>
+      <circle cx="50" cy="42" r="9" fill="#FF6B6B"/>
+    </symbol>
+    <symbol id="g-fact_scanner" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="58" y="16" width="24" height="14" rx="4" fill="#2BA58A"/>
+      <rect x="8" y="28" width="84" height="58" rx="11" fill="#34C3A0"/>
+      <circle cx="50" cy="57" r="20" fill="#fff"/>
+      <circle cx="50" cy="57" r="10" fill="#14284B"/>
+      <circle cx="22" cy="42" r="4" fill="#FFD23F" stroke-width="2.5"/>
+    </symbol>
+    <symbol id="g-pocket_watch" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="43" y="4" width="14" height="12" rx="3" fill="#E8A33D"/>
+      <circle cx="50" cy="58" r="36" fill="#FFD23F"/>
+      <circle cx="50" cy="58" r="27" fill="#FFF7E6"/>
+      <path d="M50 58V40M50 58l13 8" stroke-width="4.5"/>
+      <path d="M50 35v3M50 78v3M25 58h3M72 58h3" stroke-width="3"/>
+    </symbol>
+    <symbol id="g-weather_vane" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="36" cy="38" r="20" fill="#FFD23F"/>
+      <path d="M30 80 Q16 80 18 68 Q20 58 32 60 Q36 46 52 48 Q66 44 72 58 Q88 56 88 70 Q88 80 76 80Z" fill="#fff"/>
+    </symbol>
+    <symbol id="g-calc_cube" viewBox="0 0 100 100" fill="none" stroke="#14284B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="22" y="6" width="56" height="88" rx="9" fill="#FF8A3D"/>
+      <rect x="31" y="15" width="38" height="18" rx="4" fill="#FFF7E6"/>
+      <g fill="#FFF7E6" stroke-width="3"><circle cx="36" cy="48" r="5"/><circle cx="50" cy="48" r="5"/><circle cx="64" cy="48" r="5"/>
+        <circle cx="36" cy="63" r="5"/><circle cx="50" cy="63" r="5"/><circle cx="64" cy="63" r="5"/>
+        <circle cx="36" cy="78" r="5"/><circle cx="50" cy="78" r="5"/><circle cx="64" cy="78" r="5" fill="#FFD23F"/></g>
+    </symbol>
+
+  </defs>
+</svg>
+
+<button class="sound-toggle" id="soundToggle" type="button" aria-pressed="true" title="Turn sound effects on or off">🔊 Sound on</button>
+<main>
+  <header>
+    <h1>Doraemon's Pocket</h1>
+    <p>Ask Doraemon a question and he pulls out the gadget that fits.</p>
+  </header>
+
+  <section class="stage" aria-label="Doraemon">
+    <div class="bubble" role="status" aria-live="polite"><div id="pipsay">Hi, I'm Pip! What do you want to know?</div><div id="stageExtra"></div></div>
+
+    <div class="pip-wrap" id="pipWrap">
+      <div id="stageFig"></div>
+      <div id="pouchFx" aria-hidden="true"></div>
+      <div id="gadget" aria-hidden="true"></div>
+    </div>
+
+    <form id="form" autocomplete="off">
+      <label class="sr" for="q">Ask your query here</label>
+      <input type="text" id="q" maxlength="400" placeholder="Ask your query here…" required>
+      <button class="ask" id="go" type="submit">Ask Doraemon</button>
+      </form>
+    <div class="chips" id="chips"></div>
+
+    <details class="drawer" id="drawer">
+      <summary>Gadget drawer: what each one is for</summary>
+      <ul id="drawerList"></ul>
+    </details>
+  </section>
+
+  <section class="answer-zone" aria-label="Answer and chat">
+    <div class="placeholder" id="empty">
+      <b>Your answer unfolds here</b>
+      The gadget opens on this page once it's found.
+    </div>
+    <article class="card" id="card" aria-live="polite"></article>
+    <section class="more" id="more" aria-label="More from Doraemon" hidden>
+      <h3>More from Doraemon</h3>
+      <div class="sec" id="moreNext"></div><div class="sec" id="moreTry"></div><div class="sec" id="moreOut"></div>
+    </section>
+  </section>
+</main>
+
+<script src="/static/characters.js"></script>
+<script src="/static/sounds.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let ART = {characters:{}, gadgets:{}};      // custom artwork you drop into static/ (see README)
+let lastQ = "", lastTopic = "", CFG = {};
+let NAMES = {Pip:"Pip", Kiko:"Kiko", Mira:"Mira", Bruno:"Bruno", Rico:"Rico"};   // overridden by static/cast.json
+let S = "pip", CHARS = {};                      // S = selected character id
+const KEY = {pip:"Pip"};
+const N = s => String(s).replace(/\b(Pip|Kiko|Mira|Bruno|Rico)\b/g,      // "Pip" in dialogue means whoever is hosting
+  m => (m === "Pip" && S !== "pip") ? (NAMES[KEY[S]] || m) : (NAMES[m] || m));
+function renameStatic(){
+  document.title = N(document.title);
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), nodes = [];
+  while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(t => { if (!["SCRIPT","STYLE"].includes(t.parentElement.tagName)) t.nodeValue = N(t.nodeValue); });
+  document.querySelectorAll("[aria-label],[alt],[title]").forEach(el => ["aria-label","alt","title"].forEach(a => {
+    if (el.hasAttribute(a)) el.setAttribute(a, N(el.getAttribute(a))); }));
+}
+
+const GADGETS = [
+  {id:"portal_door",   name:"Portal Door",   use:"Places and geography",       ex:"Where is Mount Fuji?",              color:"#FFB3D1"},
+  {id:"rewind_cloth",  name:"Rewind Cloth",  use:"History, 'when did…'",       ex:"When did World War II end?",        color:"#D9C2F2"},
+  {id:"recall_toast",  name:"Recall Toast",  use:"Summaries, key points",      ex:"Summarize what RAG is",             color:"#FBE0B0"},
+  {id:"shrink_light",  name:"Shrink Light",  use:"Simple explanations",        ex:"Explain how vaccines work",         color:"#C9C2F7"},
+  {id:"propeller_cap", name:"Sky Propeller", use:"How-to and recipes",         ex:"How to cook basmati rice?",         color:"#FFE680"},
+  {id:"fact_scanner",  name:"Fact Scanner",  use:"Quick facts, comparisons",   ex:"How far is the Moon?",              color:"#A8E8D6"},
+  {id:"pocket_watch",  name:"Pocket Watch",  use:"Live time and date",         ex:"What time is it in London?",        color:"#FFD9A0"},
+  {id:"weather_vane",  name:"Weather Vane",  use:"Live weather",               ex:"Weather in Delhi",                  color:"#BFE3FF"},
+  {id:"calc_cube",     name:"Calc Cube",     use:"Maths and percentages",      ex:"What is 18% of 450?",               color:"#FFC4A3"},
+];
+const G = Object.fromEntries(GADGETS.map(g => [g.id, g]));
+const EXAMPLES = ["Where is Mount Everest?", "When did India become independent?", "Explain how photosynthesis works",
+                  "How to make masala chai?", "What time is it in Tokyo?", "What is 15% of 240?", "Who was Nikola Tesla?"];
+
+/* ---- art helpers: custom image if you provided one, else the built-in SVG ---- */
+function gadgetIcon(id){
+  return ART.gadgets[id] ? `<img src="/static/gadgets/${esc(ART.gadgets[id])}" alt="">` : `<svg aria-hidden="true"><use href="#g-${id}"/></svg>`;
+}
+const isHtmlArt = f => /\.html?$/i.test(f || "");
+
+/* ---- tiny markdown: **bold**, "- " bullets, "1. " steps, paragraphs (input escaped first) ---- */
+function render(md){
+  const lines = esc(md).split(/\r?\n/);
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const raw of lines){
+    const line = raw.trim().replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    let m;
+    if ((m = line.match(/^[-*•]\s+(.*)/))) { if (list !== "ul"){ close(); html += "<ul>"; list = "ul"; } html += `<li>${m[1]}</li>`; }
+    else if ((m = line.match(/^\d+[.)]\s+(.*)/))) { if (list !== "ol"){ close(); html += "<ol>"; list = "ol"; } html += `<li>${m[1]}</li>`; }
+    else if (line){ close(); html += `<p>${line}</p>`; }
+  }
+  close();
+  return html;
+}
+
+/* ---- Selected character's speech bubble ---- */
+const pipSay = t => {
+  const text = N(t);
+  $("#pipsay").textContent = text;
+};
+
+/* ---- "More from Doraemon": follow-up ideas, short version, quiz, fun fact ---- */
+const TOOLS = ["pocket_watch","weather_vane","calc_cube"];
+const P = t => { const p = document.createElement("p"); p.textContent = N(t); return p; };
+function opts(list){
+  const d = document.createElement("div"); d.className = "opts";
+  for (const [label, fn, cls] of list){
+    const b = document.createElement("button"); b.type = "button"; b.className = "opt " + (cls || "");
+    b.textContent = N(label); b.onclick = () => { Sound.play("blip"); fn(); }; d.append(b);
+  }
+  return d;
+}
+const slot = (id, ...nodes) => { const el = $("#" + id); el.replaceChildren(...nodes); $("#more").hidden = false; };
+const askAgain = q => { $("#q").value = q; $("#form").requestSubmit(); };
+const funButtons = (extra = []) => opts([...extra, ["Quiz me!", () => quiz(lastTopic), "soft"], ["Fun fact", () => fact(lastTopic), "soft"]]);
+
+function greet(){
+  slot("moreNext", P("I know science, space, history, geography, tech and food. I can also tell the time, check the weather and do sums. The gadget drawer shows what each gadget does."));
+  slot("moreTry", funButtons());
+  $("#moreOut").replaceChildren();
+}
+
+function reactToAnswer(d){
+  const g = d.gadget, isTool = TOOLS.includes(g.id);
+  let note;
+  if (isTool) note = "That one was worked out live, no library needed. Want to try another?";
+  else if (!d.grounded) note = "That isn't in my library yet. You can add a .txt file to data/knowledge/ and I'll learn it. Meanwhile, you could try:";
+  else if (d.via === "Wikipedia") note = "That came from Wikipedia, so please double-check anything important. Ask next:";
+  else note = `I read that from the "${d.topic}" shelf of my library. Ask next:`;
+  slot("moreNext", P(note), opts((d.followups || []).map(q => [q, () => askAgain(q), "soft"])));
+  const short = (!isTool && g.id !== "shrink_light" && d.grounded)
+    ? [["Short version, please", () => ask(lastQ, {force:"shrink_light"}), "soft"]] : [];
+  slot("moreTry", funButtons(short));
+}
+
+async function quiz(topic){
+  slot("moreOut", P("Let me think of a good one…"));
+  try{
+    const q = await (await fetch("/api/quiz" + (topic ? "?topic=" + encodeURIComponent(topic) : ""))).json();
+    if (q.error) throw new Error(q.error);
+    const head = document.createElement("div"); head.className = "qtext"; head.textContent = "Quiz: fill the blank. " + q.question;
+    const holder = document.createElement("div");
+    const buttons = q.options.map((o, i) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt soft"; b.textContent = o;
+      b.onclick = () => {
+        buttons.forEach((x, j) => { x.disabled = true; if (j === q.answer) x.classList.add("right"); });
+        if (i !== q.answer) b.classList.add("wrong");
+        Sound.play(i === q.answer ? "correct" : "wrong");
+        const msg = i === q.answer ? "Correct! " : `Not quite. The answer was "${q.options[q.answer]}". `;
+        holder.replaceChildren(P(msg + q.fact), opts([["Another one!", () => quiz(q.topic), "soft"]]));
+      };
+      return b;
+    });
+    const o = document.createElement("div"); o.className = "opts"; o.append(...buttons);
+    holder.append(o);
+    slot("moreOut", head, holder);
+  }catch(e){ slot("moreOut", P("My quiz gadget is stuck. Is the server running?")); }
+}
+
+async function fact(topic){
+  slot("moreOut", P("Let me find something interesting…"));
+  try{
+    const f = await (await fetch("/api/fact" + (topic ? "?topic=" + encodeURIComponent(topic) : ""))).json();
+    slot("moreOut", P("Did you know? " + f.fact),
+         opts([["Another one!", () => fact(f.topic), "soft"], ["Different shelf", () => fact(""), "soft"]]));
+  }catch(e){ slot("moreOut", P("I couldn't fetch a fact. Is the server running?")); }
+}
+
+/* ---- gadget drawer + chips ---- */
+function buildDrawer(){
+  $("#drawerList").innerHTML = GADGETS.map(g => `<li data-id="${g.id}"><button type="button" title="Try: ${esc(g.ex)}">
+      ${gadgetIcon(g.id)}<span><b>${g.name}</b>${g.use}</span></button></li>`).join("");
+  $("#drawerList").onclick = ev => {
+    const li = ev.target.closest("li"); if (li) askAgain(G[li.dataset.id].ex);
+  };
+}
+function markDrawer(id){
+  document.querySelectorAll("#drawerList li").forEach(li => li.classList.toggle("active", li.dataset.id === id));
+}
+function buildChips(){
+  $("#chips").innerHTML = EXAMPLES.map(e => `<button type="button">${esc(e)}</button>`).join("");
+  $("#chips").onclick = ev => { if (ev.target.tagName === "BUTTON") askAgain(ev.target.textContent); };
+}
+
+/* ---- the stage: whoever is selected appears here ---- */
+function showOnStage(id){
+  const c = CHAR_ART[id], wrap = $("#pipWrap");
+  wrap.dataset.character = id;
+  const root = document.documentElement.style;
+  root.setProperty("--pouch-x", c.pocket[0] + "%"); root.setProperty("--pouch-y", c.pocket[1] + "%");
+  const spot = CharAnim.gadgetSpot();                       // the gadget ends up in his raised hand
+  root.setProperty("--gx", spot.x); root.setProperty("--gy", spot.y);
+  $("#stageFig").innerHTML = charFigure(id, (CHARS[id] || {}).name || id);
+  CharAnim.attach($("#stageFig svg"));
+  CharAnim.sync(wrap);
+}
+function selectCharacter(id){
+  S = id;
+  const g = $("#gadget"); g.className = ""; g.innerHTML = "";
+  $("#pipWrap").classList.remove("rummage", "present");
+  $("#stageExtra").replaceChildren();
+  showOnStage(id);
+  $("#go").textContent = "Ask " + CHARS[id].name;
+  $("#go").setAttribute("aria-label", "Ask " + CHARS[id].name);
+  $("#q").placeholder = "Ask " + CHARS[id].name + " your question…";
+  pipSay(CHARS[id].greet);
+  greet();
+}
+
+/* ---- the main flow ---- */
+async function ask(question, opt = {}){
+  lastQ = question;
+  const wrap = $("#pipWrap"), gadget = $("#gadget"), card = $("#card");
+  $("#go").disabled = true;
+  card.classList.remove("open"); gadget.className = ""; gadget.innerHTML = "";
+  wrap.classList.remove("present", "delivering"); wrap.classList.add("rummage");
+  Sound.play("blip"); Sound.startRummage();
+  $("#stageExtra").replaceChildren(); $("#moreOut").replaceChildren();
+  pipSay(opt.force ? "Simpler? Let me find the right light…" : CHARS[S].thinking);
+
+  const t0 = Date.now();
+  let data;
+  try{
+    const res = await fetch("/api/ask", {method:"POST", headers:{"Content-Type":"application/json"},
+                                         body: JSON.stringify({question, force: opt.force, character: S})});
+    data = await res.json();
+    if (!res.ok) throw new Error(data.error || "The server had a problem.");
+  }catch(err){
+    wrap.classList.remove("rummage"); Sound.stopRummage(); Sound.play("wrong");
+    pipSay(err instanceof TypeError ? "I can't reach my pocket. Is app.py running?" : err.message);
+    $("#go").disabled = false;
+    return;
+  }
+  await sleep(Math.max(0, 1500 - (Date.now() - t0)));
+
+  wrap.classList.remove("rummage"); wrap.classList.add("present", "delivering");
+  Sound.stopRummage(); Sound.play("pull"); setTimeout(() => Sound.play("gadget"), 380);
+  const g = data.gadget;
+  gadget.innerHTML = gadgetIcon(g.id);
+  void gadget.offsetWidth;
+  gadget.classList.add("pop");
+  markDrawer(g.id);
+  pipSay(`${data.intro} ${g.name}! ${g.tagline}`);
+  await sleep(1100);
+
+  lastTopic = data.topic || "";
+  $("#empty").style.display = "none";
+  card.style.setProperty("--gcolor", (G[g.id] || {}).color || "#FFD23F");
+  card.innerHTML = N(`
+    <div class="card-head">${gadgetIcon(g.id)}<div><h2>${esc(g.name)}</h2><p>${esc(g.tagline)}</p></div></div>
+    <div class="card-body">
+      <p class="why">${esc(data.why)}</p>
+      <div class="answer">${render(data.answer)}</div>
+      ${data.grounded ? "" : `<div class="warn">Pip couldn't find this in his library, so no source is shown.</div>`}
+      ${data.sources.length ? `<details class="src-box"><summary>What Pip read (${data.sources.length})</summary>
+        ${data.sources.map(s => `<div class="src"><b>${esc(s.topic)}</b>${s.url ? ` · <a href="${esc(s.url)}" target="_blank" rel="noopener">open</a>` : ` · match ${s.score}`}<br>${esc(s.text)}</div>`).join("")}
+      </details>` : ""}
+      <div class="meta">Answered by: ${esc(data.backend)} · Source: ${esc(data.via)}</div>
+    </div>`);
+  card.classList.add("show");
+  void card.offsetWidth;
+  card.classList.add("open"); Sound.play("pop");
+  if (window.innerWidth <= 820) card.scrollIntoView({behavior:"smooth", block:"start"});
+  pipSay(data.outro);
+  reactToAnswer(data);
+  $("#go").disabled = false;
+}
+
+$("#form").addEventListener("submit", e => {
+  e.preventDefault();
+  const q = $("#q").value.trim();
+  if (q) ask(q);
+});
+
+/* ---- start-up: custom art, names, characters, then build the page ---- */
+(async function init(){
+  try{ ART = await (await fetch("/api/art")).json(); ART.characters = {}; }catch(_){}
+  try{ CFG = await (await fetch("/static/cast.json")).json(); NAMES = {...NAMES, ...(CFG.names || {})}; }catch(_){}
+  renameStatic();
+  try{ CHARS = Object.fromEntries((await (await fetch("/api/characters")).json()).map(c => [c.id, c])); }catch(_){}
+  if (!CHARS.pip) CHARS = {pip:{id:"pip", name:"Pip", trait:"kind", greet:"Hi, I'm Pip! What do you want to know?", thinking:"Hmm… let me look in my pouch!"}};
+  let saved = null; try{ saved = localStorage.getItem("pp_char"); }catch(_){}
+  S = "pip";
+  // the wrapper's classes (rummage / present) drive the arm animation
+  new MutationObserver(() => CharAnim.sync($("#pipWrap"))).observe($("#pipWrap"), {attributes:true, attributeFilter:["class"]});
+  const setSoundUI = () => { const b = $("#soundToggle"); b.textContent = Sound.enabled ? "🔊 Sound on" : "🔇 Sound off"; b.setAttribute("aria-pressed", String(Sound.enabled)); };
+  $("#soundToggle").onclick = () => { Sound.setEnabled(!Sound.enabled); setSoundUI(); Sound.play("blip"); };
+  setSoundUI(); Sound.loadOverrides();
+  $("#stageFig").title = "Click to ring Doraemon's bell";
+  $("#stageFig").addEventListener("click", () => Sound.play("bell"));
+  buildChips(); buildDrawer();
+  await selectCharacter(S);
+})();
+</script>
+</body>
+</html>

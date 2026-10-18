@@ -1,0 +1,41 @@
+{
+  "names": {
+    "Pip": "Doraemon",
+    "Kiko": "Nobita",
+    "Mira": "Shizuka",
+    "Bruno": "Gian",
+    "Rico": "Suneo"
+  },
+  "layout": {
+    "pip": {
+      "width": null,
+      "height": null,
+      "pouchX": "50%",
+      "pouchY": "68%"
+    },
+    "kiko": {
+      "width": null,
+      "height": null,
+      "pouchX": "50%",
+      "pouchY": "53%"
+    },
+    "mira": {
+      "width": null,
+      "height": null,
+      "pouchX": "50%",
+      "pouchY": "48%"
+    },
+    "bruno": {
+      "width": null,
+      "height": null,
+      "pouchX": "50%",
+      "pouchY": "55%"
+    },
+    "rico": {
+      "width": null,
+      "height": null,
+      "pouchX": "50%",
+      "pouchY": "55%"
+    }
+  }
+}
