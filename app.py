@@ -102,7 +102,7 @@ def ask():
     )
 
 
-# ---- Google Search Console Verification Route ----
+# ---- Google Search Console Verification Handler ----
 @app.route('/google07aef1322a4299b9.html')
 def google_verify():
     return "google-site-verification: google07aef1322a4299b9.html"
