@@ -48,6 +48,22 @@ def home():
 # google07aef1322a4299b9.html
 
 @app.get("/google07aef1322a4299b9.html")
+# ---- XML Sitemap for Google Search -------------------------------
+@app.get("/sitemap.xml")
+def sitemap():
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://doraemons-gadget-lab.onrender.com/</loc>
+    </url>
+</urlset>
+"""
+    return app.response_class(
+        response=xml,
+        status=200,
+        mimetype="application/xml"
+    )
+    
 def google_verify():
     verification_file = "google07aef1322a4299b9.html"
 
